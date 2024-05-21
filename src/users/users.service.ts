@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './user.entity';
 import { Repository } from 'typeorm';
@@ -9,12 +9,18 @@ export class UsersService {
     constructor(
         @InjectRepository(Users)
         private readonly usersRepository: Repository<Users>,
-    ){}
+    ){ }
 
 
 
     async findAllUsers(): Promise<Users[]> {
-        return this.usersRepository.find();
+        const users = await this.usersRepository.find();
+
+      if ( users.length === 0 ) {
+        throw new HttpException('No users found', HttpStatus.NOT_FOUND);
+      }
+
+        return users;
     }
 
     async createUser(userDTO: UsersDto): Promise<UsersDto> {
